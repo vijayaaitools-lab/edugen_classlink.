@@ -1,7 +1,5 @@
-export const Card = ({ children }: any) => {
-  return (
-    <div style={{ border: "1px solid #ccc", padding: "10px", borderRadius: "8px" }}>
-      {children}
-    </div>
-  );
-};
+export const Card = ({ children }: any) => <div>{children}</div>;
+export const CardHeader = ({ children }: any) => <div>{children}</div>;
+export const CardContent = ({ children }: any) => <div>{children}</div>;
+export const CardTitle = ({ children }: any) => <h2>{children}</h2>;
+export const CardDescription = ({ children }: any) => <p>{children}</p>;
