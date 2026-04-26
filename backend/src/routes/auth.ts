@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, usersTable } from "../schema";
+import { db, usersTable } from "../db";
 import { eq } from "drizzle-orm";
 import crypto from "crypto";
 
