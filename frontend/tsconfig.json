@@ -1,5 +1,5 @@
 {
-  ""types": ["vite/client"]: {
+  "compilerOptions": {
     "target": "ESNext",
     "useDefineForClassFields": true,
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
@@ -14,7 +14,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+
+    "types": ["vite/client"]
   },
   "include": ["src"]
 }
