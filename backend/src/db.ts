@@ -1,4 +1,3 @@
-// Add this at the top of bd.ts file
 console.log("=== ENVIRONMENT DEBUG START ===");
 console.log("NODE_ENV:", process.env.NODE_ENV);
 console.log("All environment variables count:", Object.keys(process.env).length);
