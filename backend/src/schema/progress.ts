@@ -1,5 +1,4 @@
 import { pgTable, serial, integer, text, numeric, timestamp } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { usersTable } from "./users";
 
@@ -15,6 +14,15 @@ export const progressTable = pgTable("progress", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertProgressSchema = createInsertSchema(progressTable).omit({ id: true, updatedAt: true });
+export const insertProgressSchema = z.object({
+  studentId: z.number(),
+  subject: z.string(),
+  topic: z.string().optional().nullable(),
+  score: z.string().optional(),
+  gamesPlayed: z.number().optional(),
+  lessonsCompleted: z.number().optional(),
+  quizzesCompleted: z.number().optional(),
+});
+
 export type InsertProgress = z.infer<typeof insertProgressSchema>;
 export type Progress = typeof progressTable.$inferSelect;

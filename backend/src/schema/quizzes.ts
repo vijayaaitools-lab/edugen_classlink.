@@ -1,5 +1,4 @@
 import { pgTable, serial, integer, text, timestamp, json } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { usersTable } from "./users";
 import { lessonsTable } from "./lessons";
@@ -17,6 +16,22 @@ export const quizzesTable = pgTable("quizzes", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertQuizSchema = createInsertSchema(quizzesTable).omit({ id: true, createdAt: true });
+export const insertQuizSchema = z.object({
+  lessonId: z.number().optional().nullable(),
+  teacherId: z.number().optional().nullable(),
+  title: z.string(),
+  subject: z.string(),
+  grade: z.string(),
+  topic: z.string(),
+  questions: z.array(z.object({
+    id: z.number(),
+    question: z.string(),
+    options: z.array(z.string()),
+    correctIndex: z.number(),
+    explanation: z.string().optional(),
+  })).optional(),
+  timeLimit: z.number().optional().nullable(),
+});
+
 export type InsertQuiz = z.infer<typeof insertQuizSchema>;
 export type Quiz = typeof quizzesTable.$inferSelect;

@@ -3,12 +3,6 @@ import cors from "cors";
 import cookieSession from "cookie-session";
 import router from "./routes";
 
-declare module "express-serve-static-core" {
-  interface Request {
-    session: { userId?: number } | null;
-  }
-}
-
 const app: Express = express();
 
 const allowedOrigins = process.env.FRONTEND_URL
