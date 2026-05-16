@@ -1,94 +1,53 @@
-import { Router } from "express";
-import { db } from "../db";
-import { quizzesTable, progressTable } from "../schema";
-import { eq, and } from "drizzle-orm";
+import { pgTable, serial, integer, text, timestamp, json } from "drizzle-orm/pg-core";
+import { z } from "zod";
+import usersTable from "./users";
+import lessonsTable from "./lessons";
 
-const router = Router();
+export const quizzesTable = pgTable("quizzes", {
+  id: serial("id").primaryKey(),
 
-function requireAuth(req: any, res: any, next: any) {
-  if (!req.session?.userId) return res.status(401).json({ error: "unauthorized" });
-  next();
-}
+  // lessonsTable may be a Router export in some setups; cast to any to avoid TS errors
+  lessonId: integer("lesson_id").references(() => (lessonsTable as any).id),
 
-router.get("/", requireAuth, async (req, res) => {
-  const { lessonId, grade, subject } = req.query as Record<string, string>;
+  teacherId: integer("teacher_id")
+    .notNull()
+    .references(() => (usersTable as any).id),
 
-  const conditions: any[] = [];
-  if (lessonId) conditions.push(eq(quizzesTable.lessonId, parseInt(lessonId)));
-  if (grade) conditions.push(eq(quizzesTable.grade, grade));
-  if (subject) conditions.push(eq(quizzesTable.subject, subject));
+  title: text("title").notNull(),
 
-  const quizzes = conditions.length > 0
-    ? await db.select().from(quizzesTable).where(and(...conditions))
-    : await db.select().from(quizzesTable);
+  subject: text("subject").notNull(),
 
-  return res.json(quizzes);
+  grade: text("grade").notNull(),
+
+  topic: text("topic").notNull(),
+
+  questions: json("questions")
+    .$type<
+      {
+        id: number;
+        question: string;
+        options: string[];
+        correctIndex: number;
+        explanation?: string;
+      }[]
+    >()
+    .notNull(),
+
+  timeLimit: integer("time_limit"),
+
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-router.post("/", requireAuth, async (req, res) => {
-  const { lessonId, title, subject, grade, topic, questions, timeLimit } = req.body;
-
-  if (!title || !subject || !grade || !topic || !questions) {
-    return res.status(400).json({ error: "validation_error", message: "title, subject, grade, topic and questions required" });
-  }
-
-  const [quiz] = await db.insert(quizzesTable).values({
-    lessonId: lessonId || null,
-    teacherId: req.session!.userId,
-    title,
-    subject,
-    grade,
-    topic,
-    questions,
-    timeLimit: timeLimit || null,
-  }).returning();
-
-  return res.status(201).json(quiz);
+export const insertQuizSchema = z.object({
+  lessonId: z.number().optional().nullable(),
+  teacherId: z.number(),
+  title: z.string(),
+  subject: z.string(),
+  grade: z.string(),
+  topic: z.string(),
+  questions: z.any(),
+  timeLimit: z.number().optional().nullable(),
 });
 
-router.post("/:id/submit", requireAuth, async (req, res) => {
-  const id = parseInt(req.params.id);
-  const { answers } = req.body;
-
-  const [quiz] = await db.select().from(quizzesTable).where(eq(quizzesTable.id, id)).limit(1);
-  if (!quiz) return res.status(404).json({ error: "not_found" });
-
-  const questions = quiz.questions as Array<{ id: number; question: string; options: string[]; correctIndex: number; explanation?: string }>;
-  let correct = 0;
-  const feedback = questions.map((q, i) => {
-    const isCorrect = answers[i] === q.correctIndex;
-    if (isCorrect) correct++;
-    return { questionId: q.id, correct: isCorrect, explanation: q.explanation };
-  });
-
-  const score = questions.length > 0 ? (correct / questions.length) * 100 : 0;
-  const passed = score >= 60;
-
-  // Update progress
-  const studentId = req.session!.userId;
-  const existing = await db.select().from(progressTable)
-    .where(and(eq(progressTable.studentId, studentId), eq(progressTable.subject, quiz.subject)))
-    .limit(1);
-
-  if (existing.length > 0) {
-    await db.update(progressTable).set({
-      quizzesCompleted: (existing[0].quizzesCompleted || 0) + 1,
-      score: String(Math.max(parseFloat(existing[0].score || "0"), score)),
-      updatedAt: new Date(),
-    }).where(eq(progressTable.id, existing[0].id));
-  } else {
-    await db.insert(progressTable).values({
-      studentId,
-      subject: quiz.subject,
-      topic: quiz.topic,
-      score: String(score),
-      quizzesCompleted: 1,
-      gamesPlayed: 0,
-      lessonsCompleted: 0,
-    });
-  }
-
-  return res.json({ score, correct, total: questions.length, passed, feedback });
-});
-
-export default router;
+export type InsertQuiz = z.infer<typeof insertQuizSchema>;
+export type Quiz = typeof quizzesTable.$inferSelect;

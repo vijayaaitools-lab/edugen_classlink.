@@ -2,6 +2,7 @@ import { pgTable, serial, integer, text, timestamp, json } from "drizzle-orm/pg-
 import { z } from "zod";
 import { usersTable } from "./users";
 import { lessonsTable } from "./lessons";
+import router from "../routes";
 
 export const quizzesTable = pgTable("quizzes", {
   id: serial("id").primaryKey(),
@@ -35,3 +36,4 @@ export const insertQuizSchema = z.object({
 
 export type InsertQuiz = z.infer<typeof insertQuizSchema>;
 export type Quiz = typeof quizzesTable.$inferSelect;
+export default router;

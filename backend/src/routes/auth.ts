@@ -43,14 +43,6 @@ router.post("/register", async (req, res) => {
     name,
     email,
     passwordHash: hashPassword(password),
-    role,
-    grade: grade || null,
-    division: division || null,
-    board: board || null,
-    subject: subject || null,
-    school: school || null,
-    teacherId: resolvedTeacherId,
-    teacherCode: role === "teacher" ? generateTeacherCode() : null,
   }).returning();
 
   req.session = { userId: user.id };

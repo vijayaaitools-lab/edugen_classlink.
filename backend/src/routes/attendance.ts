@@ -53,12 +53,12 @@ router.post("/", requireAuth, async (req, res) => {
 
     if (existing.length > 0) {
       const [updated] = await db.update(attendanceTable)
-        .set({ status })
+        .set({})
         .where(eq(attendanceTable.id, existing[0].id))
         .returning();
       results.push(updated);
     } else {
-      const [inserted] = await db.insert(attendanceTable).values({ studentId, teacherId, date, status }).returning();
+      const [inserted] = await db.insert(attendanceTable).values({ studentId, teacherId, date }).returning();
       results.push(inserted);
     }
   }

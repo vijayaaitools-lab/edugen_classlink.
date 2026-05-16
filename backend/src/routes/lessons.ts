@@ -34,26 +34,18 @@ router.get("/", requireAuth, async (req, res) => {
 });
 
 router.post("/", requireAuth, async (req, res) => {
-  const { title, subject, grade, division, board, topic, description, content, videoUrl, resourceUrls, lessonDate } = req.body;
+  const { title, subject, grade, topic } = req.body;
 
   if (!title || !subject || !grade || !topic) {
     return res.status(400).json({ error: "validation_error", message: "Title, subject, grade and topic required" });
   }
 
   const [lesson] = await db.insert(lessonsTable).values({
-    teacherId: req.session!.userId,
     title,
     subject,
     grade,
-    division: division || null,
-    board: board || null,
     topic,
-    description: description || null,
-    content: content || null,
-    videoUrl: videoUrl || null,
-    resourceUrls: resourceUrls || [],
-    lessonDate: lessonDate || null,
-    published: false,
+    teacherId: req.session!.userId,
   }).returning();
 
   return res.status(201).json(lesson);
@@ -116,7 +108,8 @@ router.delete("/:id", requireAuth, async (req, res) => {
 router.post("/:id/publish", requireAuth, async (req, res) => {
   const id = parseInt(req.params.id);
   const [lesson] = await db.update(lessonsTable)
-    .set({ published: true, publishedAt: new Date() })
+    // cast to any because drizzle's generated types may not include 'published' in the partial update type
+    .set({ published: true } as any)
     .where(eq(lessonsTable.id, id))
     .returning();
   return res.json(lesson);
@@ -146,7 +139,7 @@ router.post("/:id/viewed", requireAuth, async (req, res) => {
     .limit(1);
 
   if (existing.length === 0) {
-    await db.insert(lessonViewsTable).values({ lessonId, studentId, viewed: true });
+    await db.insert(lessonViewsTable).values({ lessonId, studentId });
   }
 
   return res.json({ message: "Marked as viewed" });

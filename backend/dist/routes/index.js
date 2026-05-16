@@ -1,0 +1,28 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const health_1 = __importDefault(require("./health"));
+const auth_1 = __importDefault(require("./auth"));
+const users_1 = __importDefault(require("./users"));
+const lessons_1 = __importDefault(require("./lessons"));
+const attendance_1 = __importDefault(require("./attendance"));
+const progress_1 = __importDefault(require("./progress"));
+const badges_1 = __importDefault(require("./badges"));
+const quizzes_1 = __importDefault(require("./quizzes"));
+const topics_1 = __importDefault(require("./topics"));
+const dashboard_1 = __importDefault(require("./dashboard"));
+const router = (0, express_1.Router)();
+router.use(health_1.default);
+router.use("/auth", auth_1.default);
+router.use("/users", users_1.default);
+router.use("/lessons", lessons_1.default);
+router.use("/attendance", attendance_1.default);
+router.use("/progress", progress_1.default);
+router.use("/badges", badges_1.default);
+router.use("/quizzes", quizzes_1.default);
+router.use("/topics", topics_1.default);
+router.use("/dashboard", dashboard_1.default);
+exports.default = router;
