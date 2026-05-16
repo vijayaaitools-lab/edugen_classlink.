@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "CommonJS",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "outDir": "dist",
     "rootDir": "src",
     "strict": false,
@@ -10,7 +10,6 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "noEmitOnError": false,
-    "ignoreDeprecations": "6.0"
   },
   "include": ["src"],
   "exclude": ["drizzle.config.ts", "node_modules", "dist"]

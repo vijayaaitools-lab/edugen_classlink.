@@ -24,12 +24,10 @@ router.post("/", requireAuth, async (req, res) => {
   }
 
   const [badge] = await db.insert(badgesTable).values({
-    studentId,
-    name,
-    description: description || null,
-    icon,
-    category: category || null,
-  }).returning();
+  studentId: Number(studentId),
+  name: String(name),
+  icon: String(icon),
+}).returning();
 
   return res.status(201).json(badge);
 });

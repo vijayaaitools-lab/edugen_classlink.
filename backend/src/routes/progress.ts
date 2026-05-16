@@ -45,14 +45,9 @@ router.post("/", requireAuth, async (req, res) => {
     return res.json(updated);
   } else {
     const [created] = await db.insert(progressTable).values({
-      studentId,
-      subject,
-      topic: topic || null,
-      score: score !== undefined ? String(score) : "0",
-      gamesPlayed: gamesPlayed || 0,
-      lessonsCompleted: lessonsCompleted || 0,
-      quizzesCompleted: quizzesCompleted || 0,
-    }).returning();
+  studentId: Number(studentId),
+  subject: String(subject),
+}).returning();
     return res.json(created);
   }
 });
