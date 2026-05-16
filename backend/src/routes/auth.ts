@@ -39,11 +39,19 @@ router.post("/register", async (req, res) => {
     }
   }
 
-  const [user] = await db.insert(usersTable).values({
-    name,
-    email,
-    passwordHash: hashPassword(password),
-  }).returning();
+ const [user] = await db.insert(usersTable).values({
+  name,
+  email,
+  passwordHash: hashPassword(password),
+  role,
+  grade: grade || null,
+  division: division || null,
+  board: board || null,
+  subject: subject || null,
+  school: school || null,
+  teacherCode: role === "teacher" ? generateTeacherCode() : null,
+  teacherId: resolvedTeacherId,
+} as any).returning();
 
   req.session = { userId: user.id };
   return res.status(201).json({ user: sanitizeUser(user), message: "Registered successfully" });
