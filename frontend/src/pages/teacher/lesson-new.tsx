@@ -34,6 +34,8 @@ export default function TeacherLessonNew() {
     resourceUrls: [] as string[],
   });
   const [newResource, setNewResource] = useState("");
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [aiKey, setAiKey] = useState(user?.aiApiKey || "");
   const [aiPrompt, setAiPrompt] = useState("");
@@ -42,20 +44,42 @@ export default function TeacherLessonNew() {
   const setField = (key: string, value: string) => setForm(f => ({ ...f, [key]: value }));
 
   const createMutation = useCreateLesson({
-    mutation: {
-      onSuccess: (lesson: any) => {
-        queryClient.invalidateQueries({ queryKey: getListLessonsQueryKey({ teacherId: user?.id }) });
-        toast({ title: "Lesson created!" });
-        setLocation(`/teacher/lessons/${lesson.id}`);
-      },
-      onError: () => toast({ title: "Failed to create lesson", variant: "destructive" }),
+  mutation: {
+    onSuccess: (lesson: any) => {
+      queryClient.invalidateQueries({
+        queryKey: getListLessonsQueryKey({
+          teacherId: user?.id,
+        }),
+      });
+
+      toast({
+        title: "Lesson created!",
+      });
+
+      setLocation(`/teacher/lessons/${lesson.id}`);
     },
-  });
+
+    onError: () =>
+      toast({
+        title: "Failed to create lesson",
+        variant: "destructive",
+      }),
+  },
+});
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    createMutation.mutate({ data: { ...form, resourceUrls: form.resourceUrls } });
-  };
+  e.preventDefault();
+
+  createMutation.mutate({
+    data: {
+      ...form,
+      resourceUrls: [
+        ...form.resourceUrls,
+        ...uploadedFiles,
+      ],
+    },
+  });
+};
 
   const addResource = () => {
     if (newResource.trim()) {
@@ -116,7 +140,44 @@ export default function TeacherLessonNew() {
     const query = `${form.subject} ${form.topic} Grade ${form.grade} lesson`;
     window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, "_blank");
   };
+  const handleFileUpload = async (
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
+  const file = e.target.files?.[0];
 
+  if (!file) return;
+
+  setUploading(true);
+
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("/api/upload", 
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.url) {
+      setUploadedFiles(prev => [...prev, data.url]);
+
+      toast({
+        title: "File uploaded successfully",
+      });
+    }
+  } catch (err) {
+    toast({
+      title: "Upload failed",
+      variant: "destructive",
+    });
+  } finally {
+    setUploading(false);
+  }
+};
   const searchWeb = () => {
     const query = `${form.subject} ${form.topic} Grade ${form.grade} lesson plan`;
     window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, "_blank");
@@ -238,6 +299,31 @@ export default function TeacherLessonNew() {
             <Card>
               <CardHeader><CardTitle className="text-base">Lesson Content</CardTitle></CardHeader>
               <CardContent className="space-y-4">
+              <div className="space-y-2">
+             <Label>Upload Files</Label>
+
+             <Input
+              type="file"
+              onChange={handleFileUpload}
+              />
+
+             {uploading && (
+             <p className="text-sm text-muted-foreground">
+             Uploading...
+             </p>
+            )}
+
+             {uploadedFiles.map((file, index) => (
+               <a
+               key={index}
+               href={file}
+               target="_blank"
+              className="block text-blue-600 underline text-sm"
+               >
+              {file}
+              </a>
+              ))}
+              </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="content">Lesson Notes / Explanation</Label>
                   <Textarea
