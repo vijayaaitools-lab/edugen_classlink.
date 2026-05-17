@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { useAuth } from "@/lib/auth";
+import type { RegisterBodyBoard } from "@/api/api.schemas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,7 +39,10 @@ export default function Register() {
     setError("");
     setLoading(true);
     try {
-      await register(form);
+      await register({
+        ...form,
+        board: form.board ? (form.board as RegisterBodyBoard) : undefined,
+      });
       setLocation(form.role === "teacher" ? "/teacher" : "/student");
     } catch (err: any) {
       setError(err?.message || "Registration failed. Please try again.");

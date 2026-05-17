@@ -3,13 +3,14 @@ import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, BookOpen, ClipboardList, Users, Gamepad2,
-  HelpCircle, Globe, User, LogOut, GraduationCap
+  HelpCircle, Globe, Library, User, LogOut, GraduationCap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
   { href: "/teacher", label: "Dashboard", icon: LayoutDashboard },
   { href: "/teacher/lessons", label: "Lessons", icon: BookOpen },
+  { href: "/teacher/books", label: "Books Library", icon: Library },
   { href: "/teacher/attendance", label: "Attendance", icon: ClipboardList },
   { href: "/teacher/students", label: "Students", icon: Users },
   { href: "/teacher/games", label: "Games & Topics", icon: Gamepad2 },

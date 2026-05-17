@@ -19,10 +19,7 @@ export default function StudentQuizzes() {
   const [result, setResult] = useState<any>(null);
   const [submitted, setSubmitted] = useState(false);
 
-  const { data: quizzes = [], isLoading } = useListQuizzes(
-    { studentId: user?.id },
-    { query: { queryKey: getListQuizzesQueryKey({ studentId: user?.id }) } }
-  );
+  const { data: quizzes = [], isLoading } = useListQuizzes();
 
   const submitMutation = useSubmitQuiz({
     mutation: {

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import { useGetMe, useLogin, useLogout, useRegister } from "@/api";
+import { useGetMe, useLogin, useLogout, useRegister, getGetMeQueryKey } from "@/api";
+import type { RegisterBodyBoard } from "@/api/api.schemas";
 
 interface User {
   id: number;
@@ -34,7 +35,7 @@ interface RegisterData {
   role: "teacher" | "student";
   grade?: string;
   division?: string;
-  board?: string;
+  board?: RegisterBodyBoard;
   subject?: string;
   school?: string;
   teacherCode?: string;
@@ -46,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { data: meData, isError, refetch } = useGetMe({ query: { retry: false } });
+  const { data: meData, isError, refetch } = useGetMe({ query: { queryKey: getGetMeQueryKey(), retry: false } });
   const loginMutation = useLogin();
   const logoutMutation = useLogout();
   const registerMutation = useRegister();

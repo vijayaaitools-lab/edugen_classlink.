@@ -18,10 +18,7 @@ export default function StudentLessons() {
   const [filterSubject, setFilterSubject] = useState("all");
   const [filterViewed, setFilterViewed] = useState("all");
 
-  const { data: lessons = [], isLoading } = useListLessons(
-    { studentId: user?.id, published: true },
-    { query: { queryKey: getListLessonsQueryKey({ studentId: user?.id, published: true }) } }
-  );
+  const { data: lessons = [], isLoading } = useListLessons({ published: true });
 
   const filtered = (lessons as any[]).filter(l => {
     const matchSearch = !search || l.title.toLowerCase().includes(search.toLowerCase()) || l.topic.toLowerCase().includes(search.toLowerCase());

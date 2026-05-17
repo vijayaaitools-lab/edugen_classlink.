@@ -22,10 +22,7 @@ export default function StudentProgress() {
     { query: { queryKey: ["progress", user?.id] } }
   );
 
-  const { data: lessons = [], isLoading: lessonsLoading } = useListLessons(
-    { studentId: user?.id, published: true },
-    { query: { queryKey: getListLessonsQueryKey({ studentId: user?.id, published: true }) } }
-  );
+  const { data: lessons = [], isLoading: lessonsLoading } = useListLessons({ published: true });
 
   const isLoading = progressLoading || lessonsLoading;
 

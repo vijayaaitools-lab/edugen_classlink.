@@ -16,6 +16,7 @@ import TeacherStudents from "@/pages/teacher/students";
 import TeacherGames from "@/pages/teacher/games";
 import TeacherQuizzes from "@/pages/teacher/quizzes";
 import TeacherResources from "@/pages/teacher/resources";
+import TeacherBooks from "@/pages/teacher/books";
 import TeacherProfile from "@/pages/teacher/profile";
 import StudentDashboard from "@/pages/student/dashboard";
 import StudentLessons from "@/pages/student/lessons";
@@ -64,6 +65,7 @@ function Router() {
       <Route path="/teacher/lessons">{() => <ProtectedTeacher component={TeacherLessons} />}</Route>
       <Route path="/teacher/lessons/new">{() => <ProtectedTeacher component={TeacherLessonNew} />}</Route>
       <Route path="/teacher/lessons/:id">{() => <ProtectedTeacher component={TeacherLessonDetail} />}</Route>
+      <Route path="/teacher/books">{() => <ProtectedTeacher component={TeacherBooks} />}</Route>
       <Route path="/teacher/attendance">{() => <ProtectedTeacher component={TeacherAttendance} />}</Route>
       <Route path="/teacher/students">{() => <ProtectedTeacher component={TeacherStudents} />}</Route>
       <Route path="/teacher/games">{() => <ProtectedTeacher component={TeacherGames} />}</Route>
