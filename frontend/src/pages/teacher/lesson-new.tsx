@@ -93,34 +93,89 @@ export default function TeacherLessonNew() {
   };
 
   const generateWithAI = async () => {
-    if (!aiKey) {
-      toast({ title: "Please enter your OpenAI API key", variant: "destructive" });
-      return;
-    }
-    if (!aiPrompt) {
-      toast({ title: "Please describe what content to generate", variant: "destructive" });
-      return;
-    }
-    setAiLoading(true);
-    try {
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+  if (!aiKey) {
+    toast({
+      title: "Please enter your AI API key",
+      variant: "destructive",
+    });
+
+    return;
+  }
+
+  if (!aiPrompt) {
+    toast({
+      title: "Please enter prompt",
+      variant: "destructive",
+    });
+
+    return;
+  }
+
+  setAiLoading(true);
+
+  try {
+    localStorage.setItem("user_ai_key", aiKey);
+
+    const userKey =
+      localStorage.getItem("user_ai_key");
+
+    const response = await fetch(
+      "/api/generate",
+      {
         method: "POST",
+
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${aiKey}`,
+          "Content-Type":
+            "application/json",
+
+          "x-api-key":
+            userKey || "",
         },
+
         body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            {
-              role: "system",
-              content: `You are a helpful teacher assistant. Create educational lesson content for ${form.subject || "the subject"}, Grade ${form.grade || "unknown"}, Topic: ${form.topic || "general"}. Write clear, age-appropriate content.`
-            },
-            { role: "user", content: aiPrompt }
-          ],
-          max_tokens: 800,
+          prompt: aiPrompt,
+          subject: form.subject,
+          topic: form.topic,
+          grade: form.grade,
         }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.content) {
+      setField(
+        "content",
+
+        form.content
+          ? form.content +
+              "\n\n" +
+              data.content
+          : data.content
+      );
+
+      toast({
+        title:
+          "AI content generated",
       });
+    } else {
+      toast({
+        title:
+          "Generation failed",
+
+        variant: "destructive",
+      });
+    }
+  } catch (err) {
+    toast({
+      title: "AI request failed",
+
+      variant: "destructive",
+    });
+  } finally {
+    setAiLoading(false);
+  }
+};
       const data = await response.json();
       if (data.choices?.[0]?.message?.content) {
         const generated = data.choices[0].message.content;
@@ -159,25 +214,6 @@ export default function TeacherLessonNew() {
         body: formData,
       }
     );
-
-    const data = await response.json();
-
-    if (data.url) {
-      setUploadedFiles(prev => [...prev, data.url]);
-
-      toast({
-        title: "File uploaded successfully",
-      });
-    }
-  } catch (err) {
-    toast({
-      title: "Upload failed",
-      variant: "destructive",
-    });
-  } finally {
-    setUploading(false);
-  }
-};
   const searchWeb = () => {
     const query = `${form.subject} ${form.topic} Grade ${form.grade} lesson plan`;
     window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, "_blank");
@@ -269,9 +305,12 @@ export default function TeacherLessonNew() {
               {aiOpen && (
                 <CardContent className="space-y-4 pt-0">
                   <div className="space-y-1.5">
-                    <Label htmlFor="aiKey">Your OpenAI API Key</Label>
-                    <Input id="aiKey" type="password" placeholder="sk-..." value={aiKey} onChange={e => setAiKey(e.target.value)} data-testid="input-ai-key" />
+                    <Label htmlFor="aiKey">Your AI API Key</Label>
+                    <Input id="aiKey" type="password" placeholder="Enter any AI API key" value={aiKey} onChange={e => setAiKey(e.target.value)} data-testid="input-ai-key" />
                     <p className="text-xs text-muted-foreground">Your key is never stored on our servers</p>
+                    <p className="text-xs text-muted-foreground">
+                     Supports OpenAI, Groq, Gemini, Claude, DeepSeek etc.
+                      </p>
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="aiPrompt">What content should the AI generate?</Label>
